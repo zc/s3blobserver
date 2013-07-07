@@ -4,10 +4,8 @@ import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap
 import com.googlecode.concurrentlinkedhashmap.EvictionListener
 import com.googlecode.concurrentlinkedhashmap.EntryWeigher
 import java.io.File
-import scala.annotation.tailrec
-import scala.concurrent.duration.Duration
 import scala.concurrent.{ Promise, ExecutionContext, Future }
-import scala.util.{ Failure, Success }
+import scala.util.Success
 import spray.caching.Cache
 
 /**
@@ -16,8 +14,7 @@ import spray.caching.Cache
  * A thread-safe implementation of [[spray.caching.cache]].  The cache
  * has a defined maximum number of megabytes it can store. After the
  * maximum capacity is reached new entries cause old ones to be
- * evicted in a last-recently-used manner, i.e. the entries that
- * haven't been accessed for the longest time are evicted first.
+ * evicted in a least-recently-used manner.
  */
 final class FileCache(
   val maxCapacity: Int
@@ -35,12 +32,9 @@ final class FileCache(
 
   def get(key: Any) = Option(store.get(key))
 
-  def apply(
-    key: Any,
-    genValue: () ⇒ Future[File])
-    (
-      implicit ec: ExecutionContext
-    ): Future[File] = {
+  def apply(key: Any, genValue: () ⇒ Future[File])(
+    implicit ec: ExecutionContext
+  ): Future[File] = {
 
     val promise = Promise[File]()
     store.putIfAbsent(key, promise.future) match {

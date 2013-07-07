@@ -75,4 +75,12 @@ class FileCacheSpec extends FlatSpec with BeforeAndAfter {
         })
     }
   }
+
+  it should "not store anything if there's an error fetching it" in {
+    intercept[RuntimeException] {
+      wait(cache("a")((throw new RuntimeException("Naa")): File))
+    }
+    Thread.sleep(10)
+    cache.get("a") map { f => assert(false) }
+  }
 }
