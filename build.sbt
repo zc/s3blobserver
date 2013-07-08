@@ -1,4 +1,4 @@
-name := "s3blobstorage"
+name := "s3blobserver"
 
 resolvers += "spray repo" at "http://repo.spray.io"
 

@@ -1,4 +1,4 @@
-package com.zope.s3blobstorage
+package com.zope.s3blobserver
 
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap
 import com.googlecode.concurrentlinkedhashmap.EvictionListener

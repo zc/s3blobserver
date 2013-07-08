@@ -1,7 +1,6 @@
-package com.zope.s3blobstorage
+package com.zope.s3blobserver
 
 import akka.actor.ActorSystem
-import grizzled.file.util
 import java.io.File
 import java.io.FileOutputStream
 import org.scalatest.FlatSpec
@@ -21,12 +20,12 @@ class FileCacheSpec extends FlatSpec with BeforeAndAfter {
   val cache = new FileCache(1)
 
   before {
-    dir = util.createTemporaryDirectory("test")
+    dir = grizzled.file.util.createTemporaryDirectory("test")
   }
 
   after {
     cache.clear()
-    util.deleteTree(dir)
+    grizzled.file.util.deleteTree(dir)
   }
 
   def make_file(name: String, size: Int): File = {
