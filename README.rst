@@ -46,6 +46,10 @@ ZEO server:
 - flat blob layout, with a single directory containing blob files
   (plus a temporary directory, as usual).
 
+- Add hook to override blob garbage disposal, as garbage blobs will
+  need to be removed from S3, rather than the local file system.
+  (Or, in some cases, in addition to the local file system.
+
 ZEO client:
 
 - Client option to load blobs from an HTTP server.
