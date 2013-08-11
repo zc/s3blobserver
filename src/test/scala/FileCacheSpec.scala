@@ -3,13 +3,11 @@ package com.zope.s3blobserver
 import akka.actor.ActorSystem
 import java.io.File
 import java.io.FileOutputStream
+import java.lang.Thread
 import org.scalatest.FlatSpec
 import org.scalatest.BeforeAndAfter
-import scala.concurrent.Await
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
-
-import java.lang.Thread
 
 class FileCacheSpec extends FlatSpec with BeforeAndAfter {
 
