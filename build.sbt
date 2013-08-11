@@ -13,6 +13,9 @@ libraryDependencies += "com.amazonaws" % "aws-java-sdk" % "1.4.7"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "1.9.1" % "test"
 
+libraryDependencies += "org.mockito" % "mockito-core" % "1.9.5" %
+    "test" withSources() withJavadoc()
+
 scalacOptions ++= Seq("-deprecation", "-feature")
 
-scalaVersion := "2.10.1"
+scalaVersion := "2.10.2"
