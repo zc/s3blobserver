@@ -32,6 +32,10 @@ final class FileCache(
 
   def get(key: Any) = Option(store.get(key))
 
+  def set(key: Any, value: File)(implicit ec: ExecutionContext): Unit = {
+    this(key)(value)
+  }
+
   def apply(key: Any, genValue: () ⇒ Future[File])(
     implicit ec: ExecutionContext
   ): Future[File] = {
