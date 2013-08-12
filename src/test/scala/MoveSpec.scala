@@ -5,7 +5,7 @@ import akka.testkit.TestActorRef
 import java.io.File
 import org.mockito.Mockito._
 
-class MoveSpec extends SampleData {
+class MoveSpec extends  org.scalatest.FlatSpec {
 
   "A MoveActor" should "Move files" in {
 
