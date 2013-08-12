@@ -1,7 +1,6 @@
 package com.zope.s3blobserver
 
-import akka.actor.Actor
-import akka.actor.Props
+import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
 import java.io.File
 import java.io.FileInputStream
@@ -58,47 +57,41 @@ class CopyS3BlobCache(directory: File, cache: FileCache)
   }
 }
 
-// trait Mover(cache: FileCache, s3: S3) {
+// trait Watcher(src: File, min_age: Int, mover: ActorRef) {
 
-//   def move(src: File): Unit = {
-//     val name = src.getName
-//     S3.put(src, name)
-//     cache.move(name)
-//     // val dest = new File(cache.dir, name)
-//     // if (! src.renameTo(dest)) // TODO: doesn't work cross volume
-//     //   throw new java.io.IOException("Couldn't move " + name)
-//     // cache.set(name, dest)
-//     // if (! src.delete) // TODO: doesn't work cross volume
-//     //   throw new java.io.IOException("Couldn't delete " + name)
+//   val filter = new java.io.FileFilter {
+//     def accept(path: File) =
+//       path.isFile &&
+//       System.currentTimeMillis() - path.lastModified > min_age
 //   }
+
+//   def check() {
+//     for (f <- src.listFiles(filter))
+//       mover tell f
+//   }
+
 // }
 
-// class MoveActor(
-//   cache: FileCache,
-//   s3: S3
-// ) extends Actor {
+class MoveActor(
+  cache: S3BlobCache,
+  s3: S3
+) extends Actor {
 
-//   import context.dispatcher
+  import context.dispatcher
 
-//   val log = Logging(context.system, this)
+  val log = Logging(context.system, this)
 
-//   def move(src: File): Unit = {
-//     val name = src.getName
-//     S3.put(src, name)
-//     cache.move(name)
-//     // val dest = new File(cache.dir, name)
-//     // if (! src.renameTo(dest)) // TODO: doesn't work cross volume
-//     //   throw new java.io.IOException("Couldn't move " + name)
-//     // cache.set(name, dest)
-//     // if (! src.delete) // TODO: doesn't work cross volume
-//     //   throw new java.io.IOException("Couldn't delete " + name)
-//   }
+  def move(src: File): Unit = {
+    val name = src.getName
+    s3.put(src, name)
+    cache.move(src)
+  }
 
-//   def receive = {
-//     case src: File ⇒ move(src)
-//     case _ ⇒ log.info("received unknown message")
-//   }
-// }
+  def receive = {
+    case src: File ⇒ move(src)
+    case _ ⇒ log.info("received unknown message")
+  }
+}
 
 // trait S3BobServer(
 //   s3: S3,
