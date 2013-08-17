@@ -2,18 +2,12 @@ package com.zope.s3blobserver
 
 import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
+import akka.routing.FromConfig
+
 import java.io.File
 import java.io.FileInputStream
 
 import scala.concurrent.ExecutionContext
-
-// object MoveActor {
-//   def props(
-//     cache: FileCache,
-//     s3: S3
-//   ): Props = Props(classOf[Mover], cache, s3)
-// }
-
 
 class S3BlobCache(directory: File, val cache: FileCache)
                  (implicit ec: ExecutionContext) {
@@ -57,20 +51,31 @@ class CopyS3BlobCache(directory: File, cache: FileCache)
   }
 }
 
-// trait Watcher(src: File, min_age: Int, mover: ActorRef) {
+class Watcher(
+  src: File,
+  min_age: Int,
+  cache: S3BlobCache,
+  s3: S3) extends Actor {
 
-//   val filter = new java.io.FileFilter {
-//     def accept(path: File) =
-//       path.isFile &&
-//       System.currentTimeMillis() - path.lastModified > min_age
-//   }
+  val mover = context.actorOf(
+    Props(classOf[MoveActor], cache, s3).withRouter(FromConfig()), "mover")
 
-//   def check() {
-//     for (f <- src.listFiles(filter))
-//       mover tell f
-//   }
+  val filter = new java.io.FileFilter {
+    def accept(path: File) =
+      path.isFile &&
+      System.currentTimeMillis() - path.lastModified > min_age
+  }
 
-// }
+  def check() {
+    for (f <- src.listFiles(filter))
+      mover ! f
+  }
+
+  def receive = {
+    case _ ⇒ check()
+  }
+
+}
 
 class MoveActor(
   cache: S3BlobCache,
@@ -78,8 +83,6 @@ class MoveActor(
 ) extends Actor {
 
   import context.dispatcher
-
-  val log = Logging(context.system, this)
 
   def move(src: File): Unit = {
     val name = src.getName
@@ -89,7 +92,6 @@ class MoveActor(
 
   def receive = {
     case src: File ⇒ move(src)
-    case _ ⇒ log.info("received unknown message")
   }
 }
 
