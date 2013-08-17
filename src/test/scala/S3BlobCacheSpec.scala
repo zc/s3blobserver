@@ -25,18 +25,6 @@ class S3BlobCacheSpec extends SampleData with BeforeAndAfter {
     grizzled.file.util.deleteTree(dir)
   }
 
-  def wait_until(f: => Boolean): Unit = {
-    for (i <- 0 until 3000) {
-      if (f) {
-        return
-      }
-      Thread.sleep(10)
-    }
-    assert(false, "timed out")
-  }
-
-  def wait(future: Future[File]) = Await.result(future, Duration(1, "millis"))
-
   def create(size: Int = 9) = new S3BlobCache(cdir, size)
 
   "An S3BlobCache" should "move source files into the cache" in {

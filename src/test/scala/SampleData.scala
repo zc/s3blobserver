@@ -2,6 +2,8 @@ package com.zope.s3blobserver
 
 import java.io.{File, InputStream, FileOutputStream}
 import scala.util.Random
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration.Duration
 
 trait SampleData extends org.scalatest.FlatSpec {
 
@@ -38,4 +40,16 @@ trait SampleData extends org.scalatest.FlatSpec {
     assert(buffer.deep == bytes.deep, "data")
     assert(inp.read(buffer) == -1, "eof")
   }
+
+  def wait_until(f: => Boolean): Unit = {
+    for (i <- 0 until 3000) {
+      if (f) {
+        return
+      }
+      Thread.sleep(10)
+    }
+    assert(false, "timed out")
+  }
+
+  def wait(future: Future[File]) = Await.result(future, Duration(1, "millis"))
 }
