@@ -9,48 +9,6 @@ import java.io.FileInputStream
 
 import scala.concurrent.ExecutionContext
 
-class S3BlobCache(directory: File, val cache: FileCache)
-                 (implicit ec: ExecutionContext) {
-  // A disk cache to which files can be moved.
-  // IOW, source files must be on the same file system.
-
-  def this(directory: File, capacity_megabytes: Int)
-          (implicit ec: ExecutionContext) =
-    this(directory, new FileCache(capacity_megabytes))
-
-  // Load existing files into the cache
-  for (f <- directory.listFiles)
-    if (f.isFile)
-      cache.set(f.getName, f)
-
-  def move(src: File) : Unit = {
-    val name = src.getName
-    val dest = new File(directory, name)
-    assert(src.renameTo(dest))
-    cache.set(name, dest)
-  }
-}
-
-class CopyS3BlobCache(directory: File, cache: FileCache)
-                     (implicit ec: ExecutionContext) extends
-    S3BlobCache(directory, cache) {
-
-  def this(directory: File, capacity_megabytes: Int)
-          (implicit ec: ExecutionContext) =
-    this(directory, new FileCache(capacity_megabytes))
-
-  // A disk cache to which files must be copies.
-  // IOW, source files are on a different file system.
-
-  override def move(src: File) : Unit = {
-    val name = src.getName
-    val dest = new File(directory, name)
-    util.stream_to_file(new FileInputStream(src), dest)
-    assert(src.renameTo(dest))
-    cache.set(name, dest)
-  }
-}
-
 class Watcher(
   src: File,
   min_age: Int,
@@ -96,60 +54,65 @@ class MoveActor(
 }
 
 // trait S3BobServer(
-//   s3: S3,
-//   cache: FileCache,
-//   commit_directory: File,
-//   cache_directory: File,
+//   commited: File,
+//   cache: S3BlobCache
+// )(
+//   implicit ec: ExecutionContext
 // ) extends HttpService {
 
-//   def this(
-//     committed_directory: File,
-//     cache_directory: File,
-//     bucket: String
-//   ) = {
-
+//   // We can't use getFromFile here, because it opens the file in a
+//   // separate thread. If there's a file-not-found exception, we
+//   // wouldn't be able to catch it and fall back to the cache.  So we
+//   // open the file before detatching.
+//   def get_from_file(
+//     file: File)(
+//     implicit settings: RoutingSettings,
+//     refFactory: ActorRefFactory
+//   ): Unit = {
+//     import spray.routing.BasicMarshallers.byteArrayMarshaller
+//     val size = file.length;
+//     val inp = new FileInputStream(file)
+//     // We've opened the file, so from here, we're golden
+//     (get & detachTo(spray.routing.singleRequestServiceActor)) {
+//       implicit val bufferMarshaller = byteArrayMarshaller(contentType)
+//       if (0 < settings.fileChunkingThresholdSize &&
+//             settings.fileChunkingThresholdSize <= size
+//       )
+//         complete(inp.toByteArrayStream(settings.fileChunkingChunkSize.toInt))
+//       else
+//         complete(FileUtils.readAllBytes(file))
+//     }
 //   }
 
-//   implicit def executionContext = actorRefFactory.dispatcher
-
 //   val blobRoute = {
-
 //     get {
 //       path(Segment) {
 //         file_name =>
-
 //         try {
-//           // open the committed file. If this succeeds, were good even
-//           // if the file gets moved, cuz we're on Unix.
-//           val stream = new FileInputStream(
-//             new File(committed_directory, file_name))
-//           // 200 return data
+//           // return the committed file. If this succeeds, were good
+//           // even if the file gets moved, cuz we're on Unix.
+//           get_from_file(new File(committed_directory, file_name))
 //         }
 //         catch {
 //           case e: java.io.FileNotFoundException =>
+//             cache(file_name) {
+//               future_file =>
+//               future_file.onComplete {
+//                 case Success(file) =>
+//                   // Concievably, the file could be evicted between
+//                   // when it's accessed and when we open it. However,
+//                   // since we have an lru cache, accessing it should
+//                   // make eviction clase to impossible, unless the
+//                   // cache is way too small.
 
-//             val future_file = cache(file_name) {
-//               val cached = new File(cache_dir, file_name)
-//               S3.get(bucket_name, file_name, cached)
-//               cached
+//                   // We can use getFromFile here, because we don't
+//                   // need to fall back.
+//                   getFromFile(file)
+//                 case Failure => reject
+//               }
 //             }
-
-//           future_file.onComplete {
-//             case Success(f) =>
-//               // There's a potential race here.  Concievably, the
-//               // file could be evicted between the time it's added and
-//               // The time we open it.
-//               val stream = new FileInputStream(f)
-//               // 200 return data
-//             case Failure(e) => // 404 wtf
-//           }
 //         }
-
 //       }
-
 //     }
-
-
-//   }
 
 // }

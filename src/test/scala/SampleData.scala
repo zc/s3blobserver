@@ -51,5 +51,5 @@ trait SampleData extends org.scalatest.FlatSpec {
     assert(false, "timed out")
   }
 
-  def wait(future: Future[File]) = Await.result(future, Duration(1, "millis"))
+  def wait(future: Future[File]) = Await.result(future, Duration(99, "millis"))
 }
