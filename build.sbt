@@ -10,7 +10,7 @@ libraryDependencies += "io.spray" % "spray-routing" % "1.2-M8"
 
 libraryDependencies += "io.spray" % "spray-testkit" % "1.2-M8"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.2.0-RC2"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.2.0-RC1"
 
 libraryDependencies += "org.clapper" % "grizzled-scala_2.10" % "1.1.4"
 
