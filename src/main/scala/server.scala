@@ -1,6 +1,8 @@
 package com.zope.s3blobserver
 
 import java.io.{File, FileInputStream}
+import spray.httpx.marshalling.BasicMarshallers.ByteArrayMarshaller
+import spray.util.pimpInputStream
 
 abstract class S3BlobServer(
   val committed: File,
@@ -16,14 +18,10 @@ abstract class S3BlobServer(
     file: File)(
     implicit settings: spray.routing.RoutingSettings
   ): spray.routing.Route = {
-    import spray.httpx.marshalling.BasicMarshallers.byteArrayMarshaller
-    import spray.util.pimpInputStream
     val size = file.length;
     val inp = new FileInputStream(file)
     // We've opened the file, so from here, we're golden
     (get & detachTo(singleRequestServiceActor)) {
-      implicit val bufferMarshaller = byteArrayMarshaller(
-        spray.http.MediaTypes.`application/octet-stream`)
       if (0 < settings.fileChunkingThresholdSize &&
             settings.fileChunkingThresholdSize <= size
       )
@@ -45,24 +43,23 @@ abstract class S3BlobServer(
         catch {
           case e: java.io.FileNotFoundException =>
             {
-              ctx: spray.routing.RequestContext =>
+              ctx =>
               println("trying to get ", file_name)
               implicit val dispatcher = actorRefFactory.dispatcher
               cache(file_name, s3).onComplete {
                 case scala.util.Success(file) =>
-                  // Concievably, the file could be evicted between
-                  // when it's accessed and when we open it. However,
-                  // since we have an lru cache, accessing it should
-                  // make eviction clase to impossible, unless the
-                  // cache is way too small.
-
-                  // We can use getFromFile here, because we don't
-                  // need to fall back.
                   println("from cache", file)
-                  getFromFile(file)
+                  if (file.length < 512000) // TODO: settings?
+                    complete(
+                      org.parboiled.common.FileUtils.readAllBytes(file)
+                    )(ctx)
+                  else
+                    complete(
+                      new FileInputStream(file).toByteArrayStream(512000)
+                    )(ctx)
                 case _ =>
                   println("waaa, reject")
-                  reject
+                  reject(ctx)
               }
             }
           case _: Throwable =>
