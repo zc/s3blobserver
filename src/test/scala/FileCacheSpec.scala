@@ -1,17 +1,15 @@
 package com.zope.s3blobserver
 
-import akka.actor.ActorSystem
 import java.io.File
 import java.io.FileOutputStream
 import java.lang.Thread
-import org.scalatest.FlatSpec
-import org.scalatest.BeforeAndAfter
 import scala.concurrent.{Await, Future}
-import scala.concurrent.duration.Duration
 
-class FileCacheSpec extends FlatSpec with BeforeAndAfter {
+class FileCacheSpec extends
+    org.scalatest.FlatSpec with
+    org.scalatest.BeforeAndAfter {
 
-  implicit val system = ActorSystem()
+  implicit val system = akka.actor.ActorSystem()
   import system.dispatcher
 
   var dir: File = null
@@ -33,7 +31,8 @@ class FileCacheSpec extends FlatSpec with BeforeAndAfter {
     result
   }
 
-  def wait(future: Future[File]) = Await.result(future, Duration(1, "millis"))
+  def wait(future: Future[File]) = Await.result(
+    future, scala.concurrent.duration.Duration(99, "millis"))
 
   "A FileCache" should "start empty" in {
     assert(cache.count == 0)
