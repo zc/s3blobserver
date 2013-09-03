@@ -29,7 +29,8 @@ abstract class S3BlobServer(
   // wouldn't be able to catch it and fall back to the cache.  So we
   // open the file before detatching.
   def get_from_file_or_throw(
-    file: File)(
+    file: File
+  )(
     implicit settings: spray.routing.RoutingSettings
   ): spray.routing.Route = {
     val size = file.length;
