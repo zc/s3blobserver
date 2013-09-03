@@ -15,9 +15,9 @@ We mitigate the performance problems by:
 
 When serving blobs, we look:
 
-- in cache first,
+- where blobs are committed,
 
-- then local disk, where blobs are committed, and finally,
+- then in cache, and finally,
 
 - if a blob isn't found in cache or disk, we download it into the
   cache from s3 and then serve it from cache.
@@ -39,7 +39,7 @@ Blob server:
 
 - Watcher actor(s) copy blobs to S3 than move them to cache
 
-- HTTP server (spray.http)
+- HTTP server (spray.routing)
 
 ZEO server:
 
