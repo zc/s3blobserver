@@ -10,6 +10,20 @@ abstract class S3BlobServer(
   val s3: S3
 ) extends spray.routing.HttpService {
 
+
+  def complete_with_stream(
+    inp: FileInputStream, size: Long
+  )(
+    implicit settings: spray.routing.RoutingSettings
+  ) = {
+    if (0 < settings.fileChunkingThresholdSize &&
+          settings.fileChunkingThresholdSize <= size
+    )
+      complete(inp.toByteArrayStream(settings.fileChunkingChunkSize.toInt))
+    else
+      complete(org.parboiled.common.FileUtils.readAllBytes(inp))
+  }
+
   // We can't use getFromFile here, because it opens the file in a
   // separate thread. If there's a file-not-found exception, we
   // wouldn't be able to catch it and fall back to the cache.  So we
@@ -22,12 +36,7 @@ abstract class S3BlobServer(
     val inp = new FileInputStream(file)
     // We've opened the file, so from here, we're golden
     (get & detachTo(singleRequestServiceActor)) {
-      if (0 < settings.fileChunkingThresholdSize &&
-            settings.fileChunkingThresholdSize <= size
-      )
-        complete(inp.toByteArrayStream(settings.fileChunkingChunkSize.toInt))
-      else
-        complete(org.parboiled.common.FileUtils.readAllBytes(file))
+      complete_with_stream(inp, size)
     }
   }
 
@@ -41,29 +50,26 @@ abstract class S3BlobServer(
           get_from_file_or_throw(new File(committed, file_name))
         }
         catch {
-          case e: java.io.FileNotFoundException =>
-            {
+          case e: java.io.FileNotFoundException => // Not in committed
+            { // We're making a directive on the fly, so we can snag a context 
               ctx =>
-              println("trying to get ", file_name)
               implicit val dispatcher = actorRefFactory.dispatcher
-              cache(file_name, s3).onComplete {
+              // Check the cache, which may downloaf from s3.
+              cache(file_name, s3) onComplete {
                 case scala.util.Success(file) =>
-                  println("from cache", file)
-                  if (file.length < 512000) // TODO: settings?
-                    complete(
-                      org.parboiled.common.FileUtils.readAllBytes(file)
-                    )(ctx)
-                  else
-                    complete(
-                      new FileInputStream(file).toByteArrayStream(512000)
-                    )(ctx)
+                  try {
+                    val route = complete_with_stream(
+                      new FileInputStream(file), file.length)
+                    route(ctx)
+                  }
+                  catch {
+                    case _: Throwable => reject(ctx)
+                  }
                 case _ =>
-                  println("waaa, reject")
                   reject(ctx)
               }
             }
-          case _: Throwable =>
-              reject
+          case _: Throwable => reject // wtf?
         }
       }
     }
