@@ -2,7 +2,8 @@ package com.zope.s3blobserver
 
 import java.io.File
 import grizzled.file.util.createTemporaryDirectory
-import org.mockito.Mockito.{mock, verify, verifyNoMoreInteractions}
+import org.mockito.Mockito.{doThrow, mock, verify, verifyNoMoreInteractions}
+import org.mockito.Mockito.{when}
 
 class TestServer(
   committed: File,
@@ -57,6 +58,16 @@ class ServerSpec extends
 
     Get("/smallcached") ~> server.routes ~> check {
       assert(entityAs[Array[Byte]].deep == bytes.deep)
+    }
+  }
+
+  it should "404 when there's an error" in {
+
+    doThrow(new com.amazonaws.services.s3.model.AmazonS3Exception("")
+    ).when(server.s3).get("x", new File(server.cache.directory, "x.tmp"));
+
+    Get("/x") ~> server.sealRoute(server.routes) ~> check {
+      assert(status === spray.http.StatusCodes.NotFound)
     }
 
   }
