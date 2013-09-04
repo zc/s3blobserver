@@ -37,7 +37,7 @@ Blob server:
 
 - Disk cache, based on spray.caching
 
-- Watcher actor(s) copy blobs to S3 than move them to cache
+- Watcher actor(s) copy blobs to S3 then move them to cache
 
 - HTTP server (spray.routing)
 
@@ -48,7 +48,7 @@ ZEO server:
 
 - Add hook to override blob garbage disposal, as garbage blobs will
   need to be removed from S3, rather than the local file system.
-  (Or, in some cases, in addition to the local file system.
+  (Or, in some cases, in addition to the local file system.)
 
 ZEO client:
 
