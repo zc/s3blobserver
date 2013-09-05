@@ -43,7 +43,7 @@ class ServerSpec extends
       file = new File(server.committed, "smallcommitted"),
       delete = false, exact_size = true)
 
-    Get("/smallcommitted") ~> server.routes ~> check {
+    Get("/smallcommitted") ~> server.route ~> check {
       assert(entityAs[Array[Byte]].deep == bytes.deep)
     }
   }
@@ -56,7 +56,7 @@ class ServerSpec extends
     server.cache.move(tmpf)
     assert(new File(server.cache.directory, "smallcached").exists)
 
-    Get("/smallcached") ~> server.routes ~> check {
+    Get("/smallcached") ~> server.route ~> check {
       assert(entityAs[Array[Byte]].deep == bytes.deep)
     }
   }
@@ -66,7 +66,7 @@ class ServerSpec extends
     doThrow(new com.amazonaws.services.s3.model.AmazonS3Exception("")
     ).when(server.s3).get("x", new File(server.cache.directory, "x.tmp"));
 
-    Get("/x") ~> server.sealRoute(server.routes) ~> check {
+    Get("/x") ~> server.sealRoute(server.route) ~> check {
       assert(status === spray.http.StatusCodes.NotFound)
     }
 
