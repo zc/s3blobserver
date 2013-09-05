@@ -5,6 +5,7 @@ import java.io.{File, FileInputStream}
 import java.lang.Thread
 import scala.concurrent.{Await, Future}
 import org.mockito.Mockito.{mock, verify, verifyNoMoreInteractions}
+import org.mockito.Mockito
 import org.scalatest.BeforeAndAfter
 import scala.concurrent.duration.Duration
 
@@ -101,6 +102,17 @@ class S3BlobCacheSpec extends SampleData with BeforeAndAfter {
 
     // s3 wasn't called:
     verifyNoMoreInteractions(s3)
+  }
+
+  it should "return null if the file can't be downloaded from s3" in {
+    val cache = create()
+    val s3 = mock(classOf[S3])
+
+    Mockito.doThrow(
+      new com.amazonaws.services.s3.model.AmazonS3Exception("")
+    ).when(s3).get("m", new File(cache.directory, "m.tmp"));
+
+    assert(wait(cache("m", s3)) === null)
   }
 }
 
