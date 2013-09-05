@@ -38,6 +38,11 @@ class S3BlobCache(
       val cached = new File(directory, name)
       assert(tmp.renameTo(cached))
       cached
+    } recover {
+      // We use recover here because we don't want null responses to
+      // be cached, so we have to create them through exceptions.
+      case _: com.amazonaws.services.s3.model.AmazonS3Exception =>
+        null
     }
   }
 }
