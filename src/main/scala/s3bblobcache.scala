@@ -4,8 +4,7 @@ import java.io.{File, FileInputStream}
 import scala.concurrent.{ExecutionContext, Future}
 
 class S3BlobCache(
-  val directory: File,
-  val cache: FileCache
+  val directory: File, val cache: FileCache
 )(
   implicit ec: ExecutionContext
 ) {
@@ -14,10 +13,8 @@ class S3BlobCache(
 
   def this(
     directory: File, capacity_megabytes: Int
-  )(implicit ec: ExecutionContext) = {
-
+  )(implicit ec: ExecutionContext) = 
     this(directory, new FileCache(capacity_megabytes))
-  }
 
   // Load existing files into the cache
   for (f <- directory.listFiles)
