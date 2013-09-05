@@ -4,7 +4,6 @@ import akka.actor.ActorSystem
 import java.io.{File, FileInputStream}
 import java.lang.Thread
 import scala.concurrent.{Await, Future}
-import org.mockito.Mockito.{mock, verify, verifyNoMoreInteractions}
 import org.mockito.Mockito
 import org.scalatest.BeforeAndAfter
 import scala.concurrent.duration.Duration
@@ -73,7 +72,7 @@ class S3BlobCacheSpec extends SampleData with BeforeAndAfter {
     // We're mocking S3, so it's not actually going to download
     // anything, so we create the file a real s3 would have
     // downloaded.
-    val s3 = mock(classOf[S3])
+    val s3 = Mockito.mock(classOf[S3])
     val (tmpf, bytes) = make_tempfile(
       delete=false, file=new File(cache.directory, "x.tmp"))
 
@@ -89,7 +88,7 @@ class S3BlobCacheSpec extends SampleData with BeforeAndAfter {
     assert( ! tmpf.exists)
 
     // S3 was called as expected
-    verify(s3).get("x", tmpf)
+    Mockito.verify(s3).get("x", tmpf)
 
     {
       // Now fetch again.  We'll get data from the cache and won't call
@@ -101,12 +100,12 @@ class S3BlobCacheSpec extends SampleData with BeforeAndAfter {
     }
 
     // s3 wasn't called:
-    verifyNoMoreInteractions(s3)
+    Mockito.verifyNoMoreInteractions(s3)
   }
 
   it should "return null if the file can't be downloaded from s3" in {
     val cache = create()
-    val s3 = mock(classOf[S3])
+    val s3 = Mockito.mock(classOf[S3])
 
     Mockito.doThrow(
       new com.amazonaws.services.s3.model.AmazonS3Exception("")
