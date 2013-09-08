@@ -34,8 +34,7 @@ abstract class S3BlobServer(
               }
           }
         ) {
-          t =>
-            val (inp, size) = t
+          case (inp, size) =>
             val settings = spray.routing.RoutingSettings.default
             if (inp == null)
               reject
