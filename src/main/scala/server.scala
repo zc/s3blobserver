@@ -9,6 +9,8 @@ abstract class S3BlobServer(
   val committed: File,  val cache: S3BlobCache, val s3: S3
 ) extends spray.routing.HttpService {
 
+  val settings = spray.routing.RoutingSettings.default
+
   val route = {
     get {
       path(Segment) {
@@ -35,7 +37,6 @@ abstract class S3BlobServer(
           }
         ) {
           case (inp, size) =>
-            val settings = spray.routing.RoutingSettings.default
             if (inp == null)
               reject
             else if (size > settings.fileChunkingThresholdSize)
