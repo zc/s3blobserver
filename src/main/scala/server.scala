@@ -9,46 +9,42 @@ abstract class S3BlobServer(
   val committed: File,  val cache: S3BlobCache, val s3: S3
 ) extends spray.routing.HttpService {
 
-  def file_data(
-    inp: FileInputStream, size: Long)(
-    implicit settings: spray.routing.RoutingSettings) =
-  {
-    if (0 < settings.fileChunkingThresholdSize &&
-          settings.fileChunkingThresholdSize <= size)
-      Left(inp.toByteArrayStream(settings.fileChunkingChunkSize.toInt))
-    else
-      Right(org.parboiled.common.FileUtils.readAllBytes(inp))
-  }
-
   val route = {
-    rejectEmptyResponse {
-      get {
-        path(Segment) {
-          file_name =>
+    get {
+      path(Segment) {
+        file_name =>
 
-          implicit val dispatcher = actorRefFactory.dispatcher
-          try {
-            // return the committed file. If this succeeds, were good
-            // even if the file gets removed, cuz we're on Unix.
+        implicit val dispatcher = actorRefFactory.dispatcher
+        onSuccess(
+          Future {
             val file = new File(committed, file_name)
             val size = file.length;
-            val inp = new FileInputStream(file)
-            complete(Future { file_data(inp, size) })
-          }
-          catch {
+            (new FileInputStream(file), size)
+          } recoverWith {
             case e: java.io.FileNotFoundException =>
-              // Not in committed
-              // Check the cache, which may downloaf from s3.
-              complete(
-                cache(file_name, s3) map {
-                  file =>
-                  if (file == null)
-                    // Couldn't find it anywhere, return empty, which 404s
-                    Right(Array[Byte]())
-                  else
-                    file_data(new FileInputStream(file), file.length)
-                })
+              cache(file_name, s3) map {
+                file =>
+                if (file == null)
+                  (null, 0.asInstanceOf[Long])
+                else
+                {
+                  val size = file.length;
+                  (new FileInputStream(file), size)
+                }
+              }
           }
+        ) {
+          t =>
+            val (inp, size) = t
+            val settings = spray.routing.RoutingSettings.default
+            if (inp == null)
+              reject
+            else if (size > settings.fileChunkingThresholdSize)
+              complete(
+                inp.toByteArrayStream(settings.fileChunkingChunkSize.toInt)
+              )
+            else
+              complete(org.parboiled.common.FileUtils.readAllBytes(inp))
         }
       }
     }
