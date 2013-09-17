@@ -4,12 +4,11 @@ import java.io.{File, FileInputStream}
 import scala.concurrent.Future
 import spray.httpx.marshalling.BasicMarshallers.ByteArrayMarshaller
 import spray.util.pimpInputStream
+import spray.routing.RoutingSettings
 
 abstract class S3BlobServer(
   val committed: File,  val cache: S3BlobCache, val s3: S3
 ) extends spray.routing.HttpService {
-
-  val settings = spray.routing.RoutingSettings.default
 
   val route = {
     get {
@@ -36,7 +35,8 @@ abstract class S3BlobServer(
               }
           }
         ) {
-          case (inp, size) =>
+         case (inp, size) =>
+            val settings = RoutingSettings.default
             if (inp == null)
               reject
             else if (size > settings.fileChunkingThresholdSize)
