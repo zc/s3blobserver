@@ -3,6 +3,18 @@ package com.zope.s3blobserver
 import java.io.{File, FileInputStream}
 import scala.concurrent.{ExecutionContext, Future}
 
+object S3BlobCache {
+
+  def apply(same_file_system: Boolean, directory: File, size: Int)(
+    implicit ec: ExecutionContext
+  ) =
+    if (same_file_system)
+      new S3BlobCache(directory, size)
+    else
+      new CopyS3BlobCache(directory, size)
+
+}
+
 class S3BlobCache(
   val directory: File, val cache: FileCache
 )(
