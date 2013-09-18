@@ -38,7 +38,7 @@ object Main extends App {
 
   val service = system.actorOf(
     Props(classOf[S3BlobServerActor], committed, cache, s3),
-    "s3blobserver")
+    name)
   akka.io.IO(Http) ! Http.Bind(
     service,
     config.getString("server.host"),
