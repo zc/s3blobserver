@@ -14,7 +14,6 @@ object Main extends App {
     ConfigFactory.load(ConfigFactory.parseFile(new File(args(0))))
   )
   implicit val dispatcher = system.dispatcher
-
   val config = system.settings.config.getConfig(name)
 
   val cache = S3BlobCache(
@@ -26,15 +25,10 @@ object Main extends App {
 
   val committed = new File(config.getString("committed.directory"))
 
-  val service = system.actorOf(
-    Props(classOf[S3BlobServerActor], committed, cache, s3),
-    "s3blobserver")
-
   val watcher = system.actorOf(
     Props(classOf[Watcher],
           committed, config.getMilliseconds("committed.age"), cache, s3),
     "watcher")
-
   system.scheduler.schedule(
     0.millisecond,
     config.getMilliseconds(
@@ -42,6 +36,9 @@ object Main extends App {
     watcher,
     "")
 
+  val service = system.actorOf(
+    Props(classOf[S3BlobServerActor], committed, cache, s3),
+    "s3blobserver")
   akka.io.IO(Http) ! Http.Bind(
     service,
     config.getString("server.host"),
