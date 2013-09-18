@@ -29,11 +29,10 @@ object Main extends App {
   val service = system.actorOf(
     Props(classOf[S3BlobServerActor], committed, cache, s3),
     "s3blobserver")
+
   val watcher = system.actorOf(
     Props(classOf[Watcher],
-          committed,
-          config.getMilliseconds("committed.age").toInt,
-          cache, s3),
+          committed, config.getMilliseconds("committed.age"), cache, s3),
     "watcher")
 
   system.scheduler.schedule(
@@ -42,6 +41,7 @@ object Main extends App {
       "committed.poll-interval").toInt.millisecond,
     watcher,
     "")
+
   akka.io.IO(Http) ! Http.Bind(
     service,
     config.getString("server.host"),

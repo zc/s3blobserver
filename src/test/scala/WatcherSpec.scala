@@ -42,7 +42,8 @@ class WatcherSpec extends SampleData {
 
     // A watcher
     val watcher = system.actorOf(Props(classOf[Watcher],
-                                       src, 10*1000, cache, s3), "watcher")
+                                       src, (10*1000).toLong, cache, s3),
+                                 "watcher")
 
     // Finally send it a message. Anything will do:
     watcher ! 42
