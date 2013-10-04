@@ -79,4 +79,9 @@ class FileCacheSpec extends
     Thread.sleep(10)
     cache.get("a") map { f => assert(false) }
   }
+
+  it should "not overflow when computing it's capacity" in {
+    val cache = new FileCache(99999)
+    expectResult(12799872) { cache.store.capacity }
+  }
 }

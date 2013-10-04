@@ -24,7 +24,7 @@ final class FileCache(
           "maxCapacity must not be negative")
 
   val store = (new ConcurrentLinkedHashMap.Builder[Any, Future[File]]
-    .maximumWeightedCapacity(maxCapacity * (1 << 20) / 8192)
+    .maximumWeightedCapacity(maxCapacity * 128)
     .listener(evicted)
     .weigher(file_size_weigher)
     .build()
