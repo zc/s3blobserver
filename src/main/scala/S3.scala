@@ -11,7 +11,8 @@ object S3 {
 class S3(client: AmazonS3Client, bucket: String, prefix: String = "") {
 
   def get(key: String, dest: File): Unit = {
-    util.stream_to_file(client.getObject(bucket, prefix+key).getObjectContent(), dest)
+    util.stream_to_file(
+      client.getObject(bucket, prefix+key).getObjectContent(), dest)
   }
 
   def put(src: File, key: String): Unit = {
