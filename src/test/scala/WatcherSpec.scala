@@ -24,13 +24,15 @@ class WatcherSpec extends SampleData {
 
     // We start by setting up a source folder, with some files in it.
     val src = grizzled.file.util.createTemporaryDirectory("testsrc")
+    val (f, b) = make_tempfile(file = new File(src, ".removed"))
+    f.setLastModified(System.currentTimeMillis() - 300*1000)
     val old_data = for (i <- 0 until 3) yield {
-      val (f, b) = make_tempfile(file = new File(src, i.toString))
+      val (f, b) = make_tempfile(file = new File(src, i.toString + ".blob"))
       f.setLastModified(System.currentTimeMillis() - 300*1000)
       b
     }
     for (i <- 3 until 6) {
-      make_tempfile(file = new File(src, i.toString))
+      make_tempfile(file = new File(src, i.toString + ".blob"))
     }
 
     // And now a cache
@@ -54,24 +56,24 @@ class WatcherSpec extends SampleData {
 
     // Now, the old files should have been moved over and copied to s3
     for (i <- 0 until 3) {
-      val cached = wait(cache.cache(i.toString) { new File("x") })
+      val cached = wait(cache.cache(i.toString + ".blob") { new File("x") })
       check_stream(new FileInputStream(cached), old_data(i))
-      val srcf = new File(src, i.toString)
-      verify(s3).put(srcf, i.toString)
+      val srcf = new File(src, i.toString + ".blob")
+      verify(s3).put(srcf, i.toString + ".blob")
       assert(! srcf.exists)
     }
     verifyNoMoreInteractions(s3)
 
     // And the new files should still be there.
     for (i <- 3 until 6)
-      assert(new File(src, i.toString).exists)
+      assert(new File(src, i.toString + ".blob").exists)
 
     // Running the watcher again, doesn't change anything
     watcher ! "ha"
     verifyNoMoreInteractions(s3)
     assert(cache.cache.count == 3)
     for (i <- 3 until 6)
-      assert(new File(src, i.toString).exists)
+      assert(new File(src, i.toString + ".blob").exists)
 
     // clean up
     grizzled.file.util.deleteTree(src)

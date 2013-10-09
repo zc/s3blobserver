@@ -13,9 +13,11 @@ class Watcher(
     "mover")
 
   val filter = new java.io.FileFilter {
-    def accept(path: File) =
+    def accept(path: File) = (
       path.isFile &&
-      System.currentTimeMillis() - path.lastModified > min_age
+        path.getName.endsWith(".blob") &&
+        System.currentTimeMillis() - path.lastModified > min_age
+    )
   }
 
   def receive = {
