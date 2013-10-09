@@ -12,7 +12,7 @@ class S3Spec extends SampleData {
 
     val client = mock(classOf[AmazonS3Client])
     val s3object = mock(classOf[S3Object])
-    when(client.getObject("mybucket", "mykey")).thenReturn(s3object)
+    when(client.getObject("mybucket", "myprefixmykey")).thenReturn(s3object)
 
     val (tmpfile, bytes) = make_tempfile()
 
@@ -21,7 +21,7 @@ class S3Spec extends SampleData {
         new FileInputStream(tmpfile),
         new org.apache.http.client.methods.HttpGet()))
 
-    val s3 = new S3(client, "mybucket")
+    val s3 = new S3(client, "mybucket", "myprefix")
     val f = new File("mydata")
     s3.get("mykey", f)
 
@@ -30,16 +30,16 @@ class S3Spec extends SampleData {
 
   it should "support upload" in {
     val client = mock(classOf[AmazonS3Client])
-    val s3 = new S3(client, "mybucket")
+    val s3 = new S3(client, "mybucket", "myprefix")
     val f = new File("mydata")
     s3.put(f, "mykey")
-    verify(client).putObject("mybucket", "mykey", f)
+    verify(client).putObject("mybucket", "myprefixmykey", f)
   }
 
   it should "support deletion" in {
     val client = mock(classOf[AmazonS3Client])
-    val s3 = new S3(client, "mybucket")
+    val s3 = new S3(client, "mybucket", "myprefix")
     s3.delete("mykey")
-    verify(client).deleteObject("mybucket", "mykey")
+    verify(client).deleteObject("mybucket", "myprefixmykey")
   }
 } 

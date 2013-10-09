@@ -21,7 +21,11 @@ object Main extends App {
     new File(config.getString("cache.directory")),
     config.getInt("cache.size"))
 
-  val s3 = new S3(S3.default_client, config.getString("s3.bucket"))
+  val s3 = new S3(
+    S3.default_client,
+    config.getString("s3.bucket"),
+    if (config.hasPath("s3.prefix")) config.getString("s3.prefix") else ""
+    )
 
   val committed = new File(config.getString("committed.directory"))
 
