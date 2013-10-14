@@ -1,10 +1,14 @@
 package com.zope.s3blobserver
 
 import akka.actor.{ActorSystem, Props}
+import akka.pattern.ask
 import java.io.File
 import scala.concurrent.duration._
 import spray.can.Http
 import com.typesafe.config.ConfigFactory
+
+object ProductionBindings extends
+    com.escalatesoft.subcut.inject.NewBindingModule(module => {})
 
 object Main extends App {
   val name = "s3blobserver"
@@ -40,12 +44,24 @@ object Main extends App {
     watcher,
     "")
 
+  implicit val timeout = akka.util.Timeout(1000)
+  implicit val bindingModule = ProductionBindings
+  var zookeeper_registration: ZooKeeperRegistration = null
+
   val service = system.actorOf(
     Props(classOf[S3BlobServerActor], committed, cache, s3),
     name)
-  akka.io.IO(Http) ! Http.Bind(
+  (akka.io.IO(Http) ? Http.Bind(
     service,
     config.getString("server.host"),
     port = config.getInt("server.port")
-  )
+   )) onSuccess {
+    case bound: akka.io.Tcp.Bound =>
+      zookeeper_registration = new ZooKeeperRegistration(
+        config.getString("server.path") + "/" +
+          config.getString("server.host") + ":" +
+          bound.localAddress.getPort,
+        config.getString("server.zookeeper")
+      )
+  }
 }

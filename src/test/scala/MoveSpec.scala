@@ -70,9 +70,8 @@ class MoveSpec extends
     f.createNewFile()
 
     Mockito.doAnswer(
-      new org.mockito.stubbing.Answer[Unit]() {
-        def answer(invocation:
-                       org.mockito.invocation.InvocationOnMock): Unit =
+      Answer[Unit] {
+        invocation =>
           throw new java.io.FileNotFoundException()
       }).when(cache).move(f)
 
