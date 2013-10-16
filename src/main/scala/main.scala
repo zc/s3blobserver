@@ -13,7 +13,8 @@ object ProductionBindings extends
 object Main extends App {
   val name = "s3blobserver"
 
-  // Set default logging config to handle log messages while configuring :)
+  // Set default logging config to handle log messages loading configuration :)
+  // and to avoid warnings about logging not being configured.
   util.load_log4j_properties_string(
     """
     log4j.rootLogger=WARN, A1
