@@ -29,4 +29,10 @@ object util {
     System.currentTimeMillis() - t
   }
 
+  def load_log4j_properties_string(src: String): Unit = {
+    val props = new java.util.Properties()
+    props.load(new java.io.ByteArrayInputStream(src.getBytes))
+    org.apache.log4j.PropertyConfigurator.configure(props)
+  }
+
 }

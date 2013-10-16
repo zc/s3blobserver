@@ -26,8 +26,8 @@ object Build extends sbt.Build {
             exclude("com.sun.jdmk", "jmxtools")
             exclude("com.sun.jmx", "jmxri")
             exclude("javax.jms", "jms"),
-          "com.escalatesoft.subcut" %% "subcut" % "2.0"
-          ),
+          "com.escalatesoft.subcut" %% "subcut" % "2.0",
+          "com.typesafe.akka" %% "akka-slf4j" % "2.2.0-RC1"          ),
         scalacOptions ++= Seq("-deprecation", "-feature"),
         scalaVersion := "2.10.2"
       ) ++
@@ -37,7 +37,7 @@ object Build extends sbt.Build {
         packMain := Map("server" -> "com.zope.s3blobserver.Main"),
         // Add custom settings here
         // [Optional] JVM options of scripts (program name -> Seq(JVM option, ...))
-        packJvmOpts := Map("server" -> Seq("-Xmx512m"))
+        packJvmOpts := Map("server" -> Seq("-server", "-Xincgc"))
         // [Optional] Extra class paths to look when launching a program
         //packExtraClasspath := Map("hello" -> Seq("${PROG_HOME}/etc"))
         )

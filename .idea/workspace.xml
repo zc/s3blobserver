@@ -4,10 +4,6 @@
     <list default="true" id="04a6b314-c40c-405c-91c2-02acc6bfb611" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/project/Build.scala" afterPath="$PROJECT_DIR$/project/Build.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/main.scala" afterPath="$PROJECT_DIR$/src/main/scala/main.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/project/plugins.sbt" afterPath="$PROJECT_DIR$/project/plugins.sbt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea_modules/s3blobserver-build.iml" afterPath="$PROJECT_DIR$/.idea_modules/s3blobserver-build.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea_modules/s3blobserver.iml" afterPath="$PROJECT_DIR$/.idea_modules/s3blobserver.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="s3blobserver.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -98,7 +94,7 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/src/main/scala/main.scala" line="54" class="com.zope.s3blobserver.Main$" package="com.zope.s3blobserver">
+      <breakpoint url="file://$PROJECT_DIR$/src/main/scala/main.scala" line="68" class="com.zope.s3blobserver.Main$" package="com.zope.s3blobserver">
         <option name="ENABLED" value="true" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -126,16 +122,7 @@
       <file leaf-file-name="main.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/scala/main.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="43" column="61" selection-start="1233" selection-end="1233" vertical-scroll-proportion="0.5">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="zk.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/zk.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="17" column="18" selection-start="700" selection-end="700" vertical-scroll-proportion="0.0">
+            <state line="52" column="61" selection-start="1579" selection-end="1579" vertical-scroll-proportion="0.5">
               <folding />
             </state>
           </provider>
@@ -473,7 +460,7 @@
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="SBT Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3298611" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.40417457" sideWeight="0.75815433" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.40417457" sideWeight="0.75815433" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39506173" sideWeight="0.24184567" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -627,13 +614,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/zk.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="17" column="18" selection-start="700" selection-end="700" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$USER_HOME$/.ivy2/cache/com.googlecode.concurrentlinkedhashmap/concurrentlinkedhashmap-lru/srcs/concurrentlinkedhashmap-lru-1.3.2-sources.jar!/com/googlecode/concurrentlinkedhashmap/ConcurrentLinkedHashMap.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="315" column="0" selection-start="12775" selection-end="12775" vertical-scroll-proportion="0.0">
@@ -643,7 +623,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/main.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="43" column="61" selection-start="1233" selection-end="1233" vertical-scroll-proportion="0.5">
+        <state line="52" column="61" selection-start="1579" selection-end="1579" vertical-scroll-proportion="0.5">
           <folding />
         </state>
       </provider>

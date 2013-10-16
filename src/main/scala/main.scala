@@ -2,10 +2,10 @@ package com.zope.s3blobserver
 
 import akka.actor.{ActorSystem, Props}
 import akka.pattern.ask
+import com.typesafe.config.ConfigFactory
 import java.io.File
 import scala.concurrent.duration._
 import spray.can.Http
-import com.typesafe.config.ConfigFactory
 
 object ProductionBindings extends
     com.escalatesoft.subcut.inject.NewBindingModule(module => {})
@@ -13,12 +13,24 @@ object ProductionBindings extends
 object Main extends App {
   val name = "s3blobserver"
 
+  // Set default logging config to handle log messages while configuring :)
+  util.load_log4j_properties_string(
+    """
+    log4j.rootLogger=WARN, A1
+    log4j.appender.A1=org.apache.log4j.ConsoleAppender
+    log4j.appender.A1.layout=org.apache.log4j.PatternLayout
+    log4j.appender.A1.layout.ConversionPattern=%d{ISO8601} %-5p %c %m%n
+    """)
+
   implicit val system = ActorSystem(
     name+"-system",
     ConfigFactory.load(ConfigFactory.parseFile(new File(args(0))))
   )
   implicit val dispatcher = system.dispatcher
   val config = system.settings.config.getConfig(name)
+
+  // Load the logging configuration (for real).
+  util.load_log4j_properties_string(config.getString("log4j"))
 
   val cache = S3BlobCache(
     config.getBoolean("cache.same-file-system"),
