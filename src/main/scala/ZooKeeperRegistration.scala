@@ -34,6 +34,7 @@ class ZooKeeperRegistration(
   connection_string: String = "127.0.0.1:2181",
   session_timeout: Int = 4000
 ) (
+  implicit val system: akka.actor.ActorSystem,
   implicit val bindingModule: com.escalatesoft.subcut.inject.BindingModule
 ) extends
     com.escalatesoft.subcut.inject.Injectable {
@@ -65,8 +66,23 @@ class ZooKeeperRegistration(
     zk = factory(connection_string, session_timeout, watcher)
 
   def register(): Unit = {
-    // TODO: If registration fails, exit!!!
-    zk.create(path, new Array[Byte](0), acls.asJava, CreateMode.EPHEMERAL)
+    try
+      zk.create(path, new Array[Byte](0), acls.asJava, CreateMode.EPHEMERAL)
+    catch {
+      // If registration fails, exit!!!
+      case e: java.lang.Throwable =>
+        try {
+          org.slf4j.LoggerFactory.getLogger(
+            classOf[ZooKeeperRegistration]).error("Failed to register: "+path)
+        }
+        catch {
+          case e2: java.lang.Throwable =>
+            println(e)
+            println(e2)
+        }
+        system.shutdown()
+        System.exit(1)
+    }
     registered = true
   }
 

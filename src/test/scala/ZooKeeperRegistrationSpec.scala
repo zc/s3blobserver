@@ -44,6 +44,7 @@ class ZooKeeperRegistrationSpec extends org.scalatest.FlatSpec {
           zk
         })
 
+      implicit val system = Mockito.mock(classOf[akka.actor.ActorSystem])
       val registration = new ZooKeeperRegistration(
         "/foo/bar", "zookeeper.example.com:2181", 2000)
 
@@ -84,6 +85,7 @@ class ZooKeeperRegistrationSpec extends org.scalatest.FlatSpec {
           zk
         })
 
+      implicit val system = Mockito.mock(classOf[akka.actor.ActorSystem])
       val registration = new ZooKeeperRegistration("/foo/bar")
     }
   }
@@ -116,6 +118,7 @@ class ZooKeeperRegistrationSpec extends org.scalatest.FlatSpec {
           if (first) zk else zk2
         })
 
+      implicit val system = Mockito.mock(classOf[akka.actor.ActorSystem])
       val registration = new ZooKeeperRegistration("/foo/bar")
 
       assert(registration.zk eq zk)

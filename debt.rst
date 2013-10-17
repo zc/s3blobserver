@@ -1,8 +1,10 @@
 Technical debt
 ==============
 
-- automated tests for main.scala (including
-  util.load_log4j_properties_string)
+Automated tests for:
 
-- automated tests of server logging
+- main.scala (including util.load_log4j_properties_string)
 
+- server logging
+
+- error logging and program exit when zk registration fails.
