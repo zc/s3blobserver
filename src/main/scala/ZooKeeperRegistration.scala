@@ -65,6 +65,7 @@ class ZooKeeperRegistration(
     zk = factory(connection_string, session_timeout, watcher)
 
   def register(): Unit = {
+    // TODO: If registration fails, exit!!!
     zk.create(path, new Array[Byte](0), acls.asJava, CreateMode.EPHEMERAL)
     registered = true
   }
