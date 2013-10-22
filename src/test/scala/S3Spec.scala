@@ -4,19 +4,21 @@ import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.S3Object
 import com.amazonaws.services.s3.model.S3ObjectInputStream
 import java.io.{File, FileInputStream, FileOutputStream}
-import org.mockito.Mockito._
+import org.mockito.Mockito
 
 class S3Spec extends SampleData {
 
   "An S3 interface" should "Support S3 download" in {
 
-    val client = mock(classOf[AmazonS3Client])
-    val s3object = mock(classOf[S3Object])
-    when(client.getObject("mybucket", "myprefixmykey")).thenReturn(s3object)
+    val client = Mockito.mock(classOf[AmazonS3Client])
+    val s3object = Mockito.mock(classOf[S3Object])
+    Mockito.when(
+      client.getObject("mybucket", "myprefixmykey")
+    ).thenReturn(s3object)
 
     val (tmpfile, bytes) = make_tempfile()
 
-    when(s3object.getObjectContent()).thenReturn(
+    Mockito.when(s3object.getObjectContent()).thenReturn(
       new com.amazonaws.services.s3.model.S3ObjectInputStream(
         new FileInputStream(tmpfile),
         new org.apache.http.client.methods.HttpGet()))
@@ -29,17 +31,17 @@ class S3Spec extends SampleData {
   }
 
   it should "support upload" in {
-    val client = mock(classOf[AmazonS3Client])
+    val client = Mockito.mock(classOf[AmazonS3Client])
     val s3 = new S3(client, "mybucket", "myprefix")
     val f = new File("mydata")
     s3.put(f, "mykey")
-    verify(client).putObject("mybucket", "myprefixmykey", f)
+    Mockito.verify(client).putObject("mybucket", "myprefixmykey", f)
   }
 
   it should "support deletion" in {
-    val client = mock(classOf[AmazonS3Client])
+    val client = Mockito.mock(classOf[AmazonS3Client])
     val s3 = new S3(client, "mybucket", "myprefix")
     s3.delete("mykey")
-    verify(client).deleteObject("mybucket", "myprefixmykey")
+    Mockito.verify(client).deleteObject("mybucket", "myprefixmykey")
   }
 } 
