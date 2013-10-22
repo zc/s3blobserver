@@ -72,4 +72,10 @@ class ServerSpec extends
 
   }
 
+  it should "provide a monitoring url" in {
+    Get("/ruok") ~> server.route ~> check {
+      assert(entityAs[Array[Byte]].deep == "imok".getBytes.deep)
+    }
+  }
+
 }

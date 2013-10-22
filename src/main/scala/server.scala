@@ -21,6 +21,9 @@ abstract class S3BlobServer(
       // causes it to happen only once before any requests.
       logRequestResponse(showResponses _) {
         get {
+          path("ruok") {
+            complete { "imok" }
+          } ~
           path(Segment) {
             file_name =>
 
