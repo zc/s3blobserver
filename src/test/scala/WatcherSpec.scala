@@ -4,7 +4,7 @@ import akka.actor.{ActorSystem, Props}
 import akka.testkit.TestActorRef
 import com.typesafe.config.ConfigFactory
 import java.io.{File, FileInputStream}
-import org.mockito.Mockito._
+import org.mockito.Mockito
 
 class WatcherSpec extends SampleData {
 
@@ -40,7 +40,7 @@ class WatcherSpec extends SampleData {
     val cache = new S3BlobCache(cdir, 99)
 
     // An s3 mock
-    val s3 = mock(classOf[S3])
+    val s3 = Mockito.mock(classOf[S3])
 
     // A watcher
     val watcher = system.actorOf(Props(classOf[Watcher],
@@ -59,10 +59,10 @@ class WatcherSpec extends SampleData {
       val cached = wait(cache.cache(i.toString + ".blob") { new File("x") })
       check_stream(new FileInputStream(cached), old_data(i))
       val srcf = new File(src, i.toString + ".blob")
-      verify(s3).put(srcf, i.toString + ".blob")
+      Mockito.verify(s3).put(srcf, i.toString + ".blob")
       assert(! srcf.exists)
     }
-    verifyNoMoreInteractions(s3)
+    Mockito.verifyNoMoreInteractions(s3)
 
     // And the new files should still be there.
     for (i <- 3 until 6)
@@ -70,7 +70,7 @@ class WatcherSpec extends SampleData {
 
     // Running the watcher again, doesn't change anything
     watcher ! "ha"
-    verifyNoMoreInteractions(s3)
+    Mockito.verifyNoMoreInteractions(s3)
     assert(cache.cache.count == 3)
     for (i <- 3 until 6)
       assert(new File(src, i.toString + ".blob").exists)
