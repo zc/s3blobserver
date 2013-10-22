@@ -46,14 +46,14 @@ class ZooKeeperRegistrationSpec extends org.scalatest.FlatSpec {
 
       implicit val system = Mockito.mock(classOf[akka.actor.ActorSystem])
       val registration = new ZooKeeperRegistration(
-        "/foo/bar", "zookeeper.example.com:2181", 2000)
+        "/foo/bar", "zookeeper.example.com:2181", 2000, "data")
 
       assert(registration.zk eq zk)
       assert(! registration.registered)
 
       watcher.process(new WatchedEvent(null, SyncConnected, null))
       Mockito.verify(zk).create(
-        "/foo/bar", new Array[Byte](0), acls.asJava, CreateMode.EPHEMERAL)
+        "/foo/bar", "data".getBytes, acls.asJava, CreateMode.EPHEMERAL)
 
       assert(registration.registered)
     }

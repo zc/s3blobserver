@@ -32,7 +32,8 @@ class ZooKeeperFactory {
 class ZooKeeperRegistration(
   path: String,
   connection_string: String = "127.0.0.1:2181",
-  session_timeout: Int = 4000
+  session_timeout: Int = 4000,
+  data: String = "" 
 ) (
   implicit val system: akka.actor.ActorSystem,
   implicit val bindingModule: com.escalatesoft.subcut.inject.BindingModule
@@ -67,7 +68,7 @@ class ZooKeeperRegistration(
 
   def register(): Unit = {
     try
-      zk.create(path, new Array[Byte](0), acls.asJava, CreateMode.EPHEMERAL)
+      zk.create(path, data.getBytes, acls.asJava, CreateMode.EPHEMERAL)
     catch {
       // If registration fails, exit!!!
       case e: java.lang.Throwable =>
