@@ -74,7 +74,10 @@ object Main extends App {
         config.getString("server.path") + "/" +
           config.getString("server.host") + ":" +
           bound.localAddress.getPort,
-        config.getString("server.zookeeper")
+        config.getString("server.zookeeper"),
+        data = (if (config.hasPath("server.zookeeper-data"))
+                  config.getString("server.zookeeper-data")
+                else "")
       )
   }
 }
