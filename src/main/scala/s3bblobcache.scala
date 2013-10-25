@@ -36,7 +36,10 @@ class S3BlobCache(
   def move(src: File) : Unit = {
     val name = src.getName
     val dest = new File(directory, name)
-    assert(src.renameTo(dest))
+    assert(
+      src.renameTo(dest) ||
+        (dest.exists && ! src.exists) // lost a race, but we're a good loser
+    )
     cache.set(name, dest)
   }
 
@@ -72,8 +75,18 @@ class CopyS3BlobCache(
   override def move(src: File) : Unit = {
     val name = src.getName
     val dest = new File(directory, name)
-    util.stream_to_file(new FileInputStream(src), dest)
-    assert(src.renameTo(dest))
+    val inp = try {
+      new FileInputStream(src)
+    }
+    catch {
+      case _: java.io.FileNotFoundException =>
+        assert(dest.exists) // lost race, but we're a good loser
+        return
+    }
+    val tmp = new File(directory, name+".tmp")
+    util.stream_to_file(inp, tmp)
+    assert(tmp.renameTo(dest))
     cache.set(name, dest)
+    src.delete
   }
 }
