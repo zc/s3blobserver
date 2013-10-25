@@ -113,6 +113,24 @@ class S3BlobCacheSpec extends SampleData with BeforeAndAfter {
 
     assert(wait(cache("m", s3)) === null)
   }
+
+  it should "not fail when asked to move a file that's already moved" in {
+
+    val cache = create()
+    val name = "x.blob"
+    new File(cache.directory, name).createNewFile()
+    cache.move(new File(dir, name)) // Look ma, no exception
+  }
+
+  it should "fail when asked to move a file that doesn't exist" in {
+
+    val cache = create()
+    val name = "x.blob"
+
+    intercept[java.lang.AssertionError] {
+      cache.move(new File(dir, name))
+    }
+  }
 }
 
 class CopyS3BlobCacheSpec extends S3BlobCacheSpec {
