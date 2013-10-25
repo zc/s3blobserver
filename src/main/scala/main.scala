@@ -80,4 +80,11 @@ object Main extends App {
                 else "")
       )
   }
+
+  // Wait fro the actor system to shut down, then exit with a non-zero
+  // exist status.  This is necessary because I don't know how to
+  // detect actor system shutdown due to an error.  It's OK cuz there
+  // is no normal reason to shot down. :)
+  system.awaitTermination()
+  System.exit(1)
 }
