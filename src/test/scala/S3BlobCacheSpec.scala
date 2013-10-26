@@ -7,11 +7,9 @@ import scala.concurrent.{Await, Future}
 import org.mockito.Mockito
 import org.scalatest.BeforeAndAfter
 import scala.concurrent.duration.Duration
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class S3BlobCacheSpec extends SampleData with BeforeAndAfter {
-
-  implicit val system = ActorSystem()
-  import system.dispatcher
 
   var dir: File = null
   var cdir: File = null
@@ -135,8 +133,6 @@ class S3BlobCacheSpec extends SampleData with BeforeAndAfter {
 }
 
 class CopyS3BlobCacheSpec extends S3BlobCacheSpec {
-
-  import system.dispatcher
 
   override def create(size: Int = 9) = new CopyS3BlobCache(cdir, size)
 
