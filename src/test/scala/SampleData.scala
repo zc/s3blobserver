@@ -5,7 +5,9 @@ import scala.util.Random
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
 
-trait SampleData extends org.scalatest.FlatSpec {
+trait SampleData extends
+    org.scalatest.FlatSpec with
+    Log4jTesting {
 
   def make_tempfile(
     size: Int = 65536,

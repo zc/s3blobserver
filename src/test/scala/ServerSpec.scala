@@ -14,11 +14,10 @@ class TestServer(
   def actorRefFactory = arf
 }
 
-
 class ServerSpec extends
- SampleData with
- spray.testkit.ScalatestRouteTest with
- org.scalatest.BeforeAndAfter {
+    SampleData with
+    spray.testkit.ScalatestRouteTest with
+    org.scalatest.BeforeAndAfter {
 
   var server: TestServer = null;
 
