@@ -51,7 +51,7 @@ class WatcherSpec extends SampleData {
 
     // There be threads involved, what with using a real actor system
     // and the futures (in the file cache), so we have to wait a bit.
-    wait_until {cache.cache.count == 3}
+    wait_until {cache.cache.size == 3}
 
     // Now, the old files should have been moved over and copied to s3
     for (i <- 0 until 3) {
@@ -70,7 +70,7 @@ class WatcherSpec extends SampleData {
     // Running the watcher again, doesn't change anything
     watcher ! "ha"
     Mockito.verifyNoMoreInteractions(s3)
-    assert(cache.cache.count == 3)
+    assert(cache.cache.size == 3)
     for (i <- 3 until 6)
       assert(new File(src, i.toString + ".blob").exists)
 

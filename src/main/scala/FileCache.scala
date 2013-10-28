@@ -24,7 +24,7 @@ final class FileCache(
           "maxCapacity must not be negative")
 
   val store = (new ConcurrentLinkedHashMap.Builder[Any, Future[File]]
-    .maximumWeightedCapacity(maxCapacity * 128)
+    .maximumWeightedCapacity(maxCapacity * 128) // *(1<<20)/8192
     .listener(evicted)
     .weigher(file_size_weigher)
     .build()
@@ -63,8 +63,9 @@ final class FileCache(
 
   def clear() = store.clear()
 
-  def count = store.size
-  def size = store.weightedSize * 8192
+  def size = store.size
+
+  def bytes = store.weightedSize * 8192
 }
 
 object evicted extends EvictionListener[Any, Future[File]] {

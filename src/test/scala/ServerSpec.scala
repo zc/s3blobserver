@@ -43,7 +43,7 @@ class ServerSpec extends
       delete = false, exact_size = true)
 
     Get("/smallcommitted") ~> server.route ~> check {
-      assert(entityAs[Array[Byte]].deep == bytes.deep)
+      assert(responseAs[Array[Byte]].deep == bytes.deep)
     }
   }
 
@@ -56,7 +56,7 @@ class ServerSpec extends
     assert(new File(server.cache.directory, "smallcached").exists)
 
     Get("/smallcached") ~> server.route ~> check {
-      assert(entityAs[Array[Byte]].deep == bytes.deep)
+      assert(responseAs[Array[Byte]].deep == bytes.deep)
     }
   }
 
@@ -73,7 +73,7 @@ class ServerSpec extends
 
   it should "provide a monitoring url" in {
     Get("/ruok") ~> server.route ~> check {
-      assert(entityAs[Array[Byte]].deep == "imok".getBytes.deep)
+      assert(responseAs[Array[Byte]].deep == "imok".getBytes.deep)
     }
   }
 
