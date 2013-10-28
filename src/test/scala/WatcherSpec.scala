@@ -1,7 +1,6 @@
 package com.zope.s3blobserver
 
 import akka.actor.{ActorSystem, Props}
-import akka.testkit.TestActorRef
 import com.typesafe.config.ConfigFactory
 import java.io.{File, FileInputStream}
 import org.mockito.Mockito

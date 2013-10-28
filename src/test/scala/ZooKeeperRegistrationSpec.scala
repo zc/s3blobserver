@@ -10,7 +10,9 @@ import org.mockito.Matchers
 import org.mockito.Mockito
 import scala.collection.JavaConverters.bufferAsJavaListConverter
 
-class ZooKeeperRegistrationSpec extends org.scalatest.FlatSpec {
+class ZooKeeperRegistrationSpec extends
+    org.scalatest.FlatSpec with
+    Log4jTesting {
 
   val acls = scala.collection.mutable.ListBuffer(
     new org.apache.zookeeper.data.ACL(

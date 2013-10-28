@@ -7,6 +7,7 @@ import scala.concurrent.{Await, Future}
 
 class FileCacheSpec extends
     org.scalatest.FlatSpec with
+    Log4jTesting with
     org.scalatest.BeforeAndAfter {
 
   implicit val system = akka.actor.ActorSystem()

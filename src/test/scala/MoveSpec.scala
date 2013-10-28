@@ -7,6 +7,7 @@ import org.mockito.Mockito
 
 class MoveSpec extends
     org.scalatest.FlatSpec with
+    Log4jTesting with
     org.scalatest.BeforeAndAfter {
 
   var dir: File = null
