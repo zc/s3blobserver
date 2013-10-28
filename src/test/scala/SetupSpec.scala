@@ -135,6 +135,8 @@ class SetupSpec extends
     ) {
       (setup, base, tmpdir, blobdir, cachedir, s3) =>
 
+      assert(setup.cache.getClass eq classOf[S3BlobCache])
+
       // verify that the logging config was updated:
       val logging_s = new java.io.ByteArrayOutputStream()
       new org.apache.log4j.config.PropertyPrinter(
@@ -183,12 +185,60 @@ class SetupSpec extends
       Mockito.verify(s3).getObject("mybucket", "test/3")
 
       // The failure is logged
+      Thread.sleep(100) // Logging is asynchronous. <shrug>
       val buffer = new Array[Byte](999)
       val read = new java.io.FileInputStream(new File(tmpdir, "log")).read(buffer)
       val log = new String(buffer.slice(0, read)).split("\n")(0) // first line
       assert(log.startsWith("ERROR"))
       assert(log.containsSlice("/3"))
       assert(log.endsWith(": wtf?"))
+    }
+  }
+
+  it should "handle separate file systems and aws creds" in {
+    with_config("""
+        akka.loglevel = ERROR
+        s3blobserver {
+          log4j = """"" + """"
+             log4j.rootLogger=WARN, TEST
+             log4j.appender.TEST=org.apache.log4j.FileAppender
+             log4j.appender.TEST.File=$tmpdir/log
+             log4j.appender.TEST.layout=org.apache.log4j.PatternLayout
+             log4j.appender.TEST.layout.ConversionPattern=%-5p %c %m%n
+             """"" + """"
+          cache {
+            same-file-system = false
+            directory = $cachedir
+            size = 100
+          }
+          s3 {
+            bucket = mybucket
+            prefix = test/
+          }
+          committed {
+            directory = $blobdir
+            age = 1s
+            poll-interval = 1s
+          }
+          server {
+            port = 0
+            host = localhost
+            path = /test
+            zookeeper = "zookeeper.example.com:2181"
+            zookeeper-data = somedata
+          }
+        }
+        aws {
+          accessKeyId = ID
+          secretKey = SECRET
+        }
+        """
+    ) {
+      (setup, base, tmpdir, blobdir, cachedir, s3) =>
+
+      assert(setup.cache.getClass eq classOf[CopyS3BlobCache])
+      expectResult("ID") { System.getProperty("aws.accessKeyId") }
+      expectResult("SECRET") { System.getProperty("aws.secretKey") }
     }
   }
 }
