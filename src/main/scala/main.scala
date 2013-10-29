@@ -45,6 +45,13 @@ class Setup(
   // Load the logging configuration (for real).
   util.load_log4j_properties_string(config.getString("log4j"))
 
+  // aws creds
+  if (system.settings.config.hasPath("aws")) {
+    val aws = system.settings.config.getConfig("aws")
+    System.setProperty("aws.accessKeyId", aws.getString("accessKeyId"))
+    System.setProperty("aws.secretKey", aws.getString("secretKey"))
+  }
+
   val cache = S3BlobCache(
     config.getBoolean("cache.same-file-system"),
     new File(config.getString("cache.directory")),
