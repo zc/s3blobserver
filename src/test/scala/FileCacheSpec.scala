@@ -36,14 +36,14 @@ class FileCacheSpec extends
     future, scala.concurrent.duration.Duration(99, "millis"))
 
   "A FileCache" should "start empty" in {
-    assert(cache.count == 0)
+    assert(cache.size == 0)
   }
 
   it should "Store files directly" in {
     val f = make_file("a", 1<<18)
     wait(cache("a")(f))
     Thread.sleep(10)
-    expectResult (1 << 18) { cache.size }
+    expectResult (1 << 18) { cache.bytes }
   }
 
   it should "evict files when it gets too big" in {
@@ -59,7 +59,7 @@ class FileCacheSpec extends
   it should "store files via function" in {
     wait(cache("a") { make_file("a", 1<<18) })
     Thread.sleep(10)
-    expectResult (1 << 18) { cache.size }
+    expectResult (1 << 18) { cache.bytes }
   }
 
   it should "not evaluate a function if the valus is already cached" in {

@@ -11,6 +11,18 @@ object ProductionBindings extends
     com.escalatesoft.subcut.inject.NewBindingModule(module => {})
 
 object Main extends App {
+  implicit val bindingModule = ProductionBindings
+  new Setup(args).system.awaitTermination()
+  System.exit(1)
+}
+
+class Setup(
+  args: Array[String]
+)(
+  implicit val bindingModule: com.escalatesoft.subcut.inject.BindingModule
+) extends
+    com.escalatesoft.subcut.inject.Injectable {
+
   val name = "s3blobserver"
 
   // Set default logging config to handle log messages loading configuration :)
@@ -39,7 +51,9 @@ object Main extends App {
     config.getInt("cache.size"))
 
   val s3 = new S3(
-    S3.default_client,
+    injectOptional[com.amazonaws.services.s3.AmazonS3Client] getOrElse {
+      S3.default_client
+    },
     config.getString("s3.bucket"),
     if (config.hasPath("s3.prefix")) config.getString("s3.prefix") else ""
     )
@@ -58,12 +72,12 @@ object Main extends App {
     "")
 
   implicit val timeout = akka.util.Timeout(1000)
-  implicit val bindingModule = ProductionBindings
   var zookeeper_registration: ZooKeeperRegistration = null
 
   val service = system.actorOf(
     Props(classOf[S3BlobServerActor], committed, cache, s3),
     name)
+
   (akka.io.IO(Http) ? Http.Bind(
     service,
     config.getString("server.host"),
@@ -80,11 +94,4 @@ object Main extends App {
                 else "")
       )
   }
-
-  // Wait for the actor system to shut down, then exit with a non-zero
-  // exit status.  This is necessary because I don't know how to
-  // detect actor system shutdown due to an error.  It's OK cuz there
-  // is no normal reason to shut down. :)
-  system.awaitTermination()
-  System.exit(1)
 }
