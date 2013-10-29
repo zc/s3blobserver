@@ -1,10 +1,12 @@
 package com.zope.s3blobserver
 
 import akka.actor.{ActorSystem, Props}
+import akka.event.Logging
 import akka.pattern.ask
 import com.typesafe.config.ConfigFactory
 import java.io.File
 import scala.concurrent.duration._
+import scala.util.{Failure, Success}
 import spray.can.Http
 
 object ProductionBindings extends
@@ -17,7 +19,8 @@ object Main extends App {
 }
 
 class Setup(
-  args: Array[String]
+  args: Array[String],
+  bind_timeout:Int = 9999
 )(
   implicit val bindingModule: com.escalatesoft.subcut.inject.BindingModule
 ) extends
@@ -78,27 +81,40 @@ class Setup(
     watcher,
     "")
 
-  implicit val timeout = akka.util.Timeout(1000)
+  implicit val timeout = akka.util.Timeout(bind_timeout)
   var zookeeper_registration: ZooKeeperRegistration = null
 
   val service = system.actorOf(
     Props(classOf[S3BlobServerActor], committed, cache, s3),
     name)
 
+  val log = Logging(system, getClass)
+  val bind_start_time = System.currentTimeMillis
   (akka.io.IO(Http) ? Http.Bind(
     service,
     config.getString("server.host"),
     port = config.getInt("server.port")
-   )) onSuccess {
-    case bound: akka.io.Tcp.Bound =>
-      zookeeper_registration = new ZooKeeperRegistration(
-        config.getString("server.path") + "/" +
-          config.getString("server.host") + ":" +
-          bound.localAddress.getPort,
-        config.getString("server.zookeeper"),
-        data = (if (config.hasPath("server.zookeeper-data"))
-                  config.getString("server.zookeeper-data")
-                else "")
-      )
+   )) onComplete {
+    case Success(result) =>
+      log.info(
+        s"Bound $result in ${System.currentTimeMillis - bind_start_time}ms")
+      result match {
+        case bound: akka.io.Tcp.Bound =>
+          zookeeper_registration = new ZooKeeperRegistration(
+            config.getString("server.path") + "/" +
+              config.getString("server.host") + ":" +
+              bound.localAddress.getPort,
+            config.getString("server.zookeeper"),
+            data = (if (config.hasPath("server.zookeeper-data"))
+                      config.getString("server.zookeeper-data")
+                    else "")
+          )
+        case wtf =>
+          log.error(s"Bind failed: $wtf")
+          system.shutdown()
+      }
+    case Failure(err) =>
+      log.error(s"Bind failed: $err")
+      system.shutdown()
   }
 }
