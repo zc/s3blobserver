@@ -22,5 +22,6 @@ object Testing {
     assert(false, "timed out "+label)
   }
 
-  def wait[T](future: Future[T]) = Await.result(future, Duration(999, "millis"))
+  def wait[T](future: Future[T]) =
+    Await.result(future, Duration(9999, "millis"))
 }
