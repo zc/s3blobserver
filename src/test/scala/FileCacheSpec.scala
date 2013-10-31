@@ -90,12 +90,13 @@ class FileCacheSpec extends
     }
   }
 
-  it should "not store anything if there's an error fetching it" in {
+  it should "evict failures (eventually)" in {
     intercept[RuntimeException] {
       wait(cache("a")((throw new RuntimeException("Naa")): File))
     }
-    Thread.sleep(10)
-    cache.get("a") map { f => assert(false) }
+    Testing.wait_until("the failure has been evicted") {
+      cache.get("a").isEmpty
+    }
   }
 
   it should "not overflow when computing it's capacity" in {
