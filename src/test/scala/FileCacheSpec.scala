@@ -33,7 +33,7 @@ class FileCacheSpec extends
   }
 
   def wait(future: Future[File]) = Await.result(
-    future, scala.concurrent.duration.Duration(999, "millis"))
+    future, scala.concurrent.duration.Duration(9999, "millis"))
 
   "A FileCache" should "start empty" in {
     assert(cache.size == 0)
