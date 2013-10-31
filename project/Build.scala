@@ -12,7 +12,8 @@ object Build extends sbt.Build {
         name := "s3blobserver",
         resolvers += "spray repo" at "http://repo.spray.io",
         libraryDependencies ++= Seq(
-          "io.spray" % "spray-caching" % "1.2-RC1",
+          "com.googlecode.concurrentlinkedhashmap" %
+            "concurrentlinkedhashmap-lru" % "1.4",
           "io.spray" % "spray-can" % "1.2-RC1",
           "io.spray" % "spray-routing" % "1.2-RC1",
           "io.spray" % "spray-testkit" % "1.2-RC1" % "test",
@@ -20,7 +21,7 @@ object Build extends sbt.Build {
           "com.typesafe.akka" %% "akka-actor" % "2.2.3",
           "com.typesafe.akka" %% "akka-slf4j" % "2.2.3",
           "com.typesafe.akka" %% "akka-testkit" % "2.2.3" % "test",
-          "org.clapper" % "grizzled-scala_2.10" % "1.1.4",
+          "org.clapper" % "grizzled-scala_2.10" % "1.1.4" % "test",
           "com.amazonaws" % "aws-java-sdk" % "1.4.7",
           "org.scalatest" %% "scalatest" % "1.9.1" % "test",
           "org.mockito" % "mockito-core" % "1.9.5" % "test",

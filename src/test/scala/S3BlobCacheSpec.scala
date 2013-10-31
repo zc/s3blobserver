@@ -55,8 +55,9 @@ class S3BlobCacheSpec extends SampleData with BeforeAndAfter {
                           exact_size=true)._2
     )
     val cache = create(5)
-    Thread.sleep(1000)
-    expectResult(5) { cdir.listFiles.length }
+    Testing.wait_until("cached files drop to 5") {
+      cdir.listFiles.length == 5
+    }
     for (f <- cdir.listFiles) {
       assert(names contains f.getName)
       val cached = wait(cache.cache(f.getName) { new File("x") })
