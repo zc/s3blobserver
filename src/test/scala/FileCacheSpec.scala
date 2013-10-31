@@ -33,7 +33,7 @@ class FileCacheSpec extends
   }
 
   def wait(future: Future[File]) = Await.result(
-    future, scala.concurrent.duration.Duration(99, "millis"))
+    future, scala.concurrent.duration.Duration(999, "millis"))
 
   "A FileCache" should "start empty" in {
     assert(cache.size == 0)
@@ -54,6 +54,23 @@ class FileCacheSpec extends
     assert(! (new File(dir, "a").exists))
     assert(new File(dir, "b").exists)
     assert(new File(dir, "c").exists)
+  }
+
+  it should "evict files when it gets too big even in threads." in {
+    for (i <- 0 until 10)
+      make_file(i.toString, 200000)
+    cache("0") {
+      Thread.sleep(99)
+      make_file("0", 1)
+    }
+    for (i <- 0 until 10)
+      cache(i.toString) {
+        new File(dir, i.toString)
+      }
+
+    Testing.wait_until("There are only 5 files in the directory") {
+      dir.list.length == 5
+    }
   }
 
   it should "store files via function" in {
@@ -84,5 +101,25 @@ class FileCacheSpec extends
   it should "not overflow when computing it's capacity" in {
     val cache = new FileCache(99999)
     expectResult(12799872) { cache.store.capacity }
+  }
+
+  it should "run functions in parallel" in {
+
+    val log = scala.collection.mutable.ListBuffer[Char]()
+    val f1 = cache("a") {
+      Thread.sleep(99)
+      log += 'a'
+      make_file("a", 1)
+    }
+    val f2 = cache("b") {
+      log += 'b'
+      make_file("b", 1)
+    }
+    wait(f2)
+    wait(f1)
+
+    expectResult("ba") {
+      new String(log.toArray)
+    }
   }
 }

@@ -6,7 +6,6 @@ import com.googlecode.concurrentlinkedhashmap.EntryWeigher
 import java.io.File
 import scala.concurrent.{ Promise, ExecutionContext, Future }
 import scala.util.Success
-import spray.caching.Cache
 
 /**
  * Based on the SimpleLruCache from spray.cache
@@ -15,40 +14,44 @@ import spray.caching.Cache
  * has a defined maximum number of megabytes it can store. After the
  * maximum capacity is reached new entries cause old ones to be
  * evicted in a least-recently-used manner.
+ *
+ * Had to fork because the original, spray.caching.LruCache is final. :(
+ * 
+ * Also the semantics of ``cache(key) func`` are different.  This
+ * implementation wraps the function in a future, so it runs in a
+ * future. The original didn't.
  */
-final class FileCache(
-  val maxCapacity: Int
-) extends Cache[File] {
+class FileCache(val maxCapacity: Int)(implicit ec: ExecutionContext) {
 
   require(maxCapacity >= 0,
           "maxCapacity must not be negative")
 
   val store = (new ConcurrentLinkedHashMap.Builder[Any, Future[File]]
     .maximumWeightedCapacity(maxCapacity * 128) // *(1<<20)/8192
-    .listener(evicted)
+    .listener(new FileEvictionListener)
     .weigher(file_size_weigher)
     .build()
   )
 
   def get(key: Any) = Option(store.get(key))
 
-  def set(key: Any, value: File)(implicit ec: ExecutionContext): Unit = {
+  def set(key: Any, value: File): Unit = {
     this(key) { value }
   }
 
-  def apply(key: Any, genValue: () ⇒ Future[File])(
-    implicit ec: ExecutionContext
-  ): Future[File] = {
+  def apply(key: Any)(get_file: ⇒ File): Future[File] = {
 
     val promise = Promise[File]()
     store.putIfAbsent(key, promise.future) match {
       case null ⇒
-        val future = genValue()
-        future.onComplete { value ⇒
+        val future = Future { get_file }
+        future.onComplete {
+          value ⇒
           promise.complete(value)
           // in case of exceptions we remove the cache entry (i.e. try
           // again later)
-          if (value.isFailure) store.remove(key, promise)
+          if (value.isFailure)
+            store.remove(key, promise)
           else
             // inform the store that the weaight has changed, cuz we
             // can actually compute a size now.
@@ -68,15 +71,12 @@ final class FileCache(
   def bytes = store.weightedSize * 8192
 }
 
-object evicted extends EvictionListener[Any, Future[File]] {
+class FileEvictionListener(
+  implicit ec: ExecutionContext
+) extends EvictionListener[Any, Future[File]] {
+
   override def onEviction(k: Any, v: Future[File]) : Unit = {
-    if (v.isCompleted) 
-      v.value map {
-        _ match {
-          case Success(f) => f.delete
-          case _ =>
-        }
-      }
+    v map { file => file.delete }
   }
 }
 
