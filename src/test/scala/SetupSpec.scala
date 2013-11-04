@@ -206,7 +206,7 @@ class SetupSpec extends
 
       // The failure is logged
       Testing.wait_until("expected log line") {
-        check_log(new File(tmpdir, "log"), "ERROR.*/3.*: wtf\\?".r)
+        check_log(new File(tmpdir, "log"), "ERROR.*/3.*: rejected".r)
       }
     }
   }

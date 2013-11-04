@@ -66,10 +66,10 @@ abstract class S3BlobServer(
 
   def showResponses(request: HttpRequest): Any ⇒ Option[LogEntry] = {
     // Rudimentry access logging, only for debugging.
-    case response: HttpResponse =>
-      Some(LogEntry(request.uri + ": " + response.status, Logging.DebugLevel))
-    case _ =>
-      Some(LogEntry(request + ": wtf?", Logging.ErrorLevel))
+    case _: spray.routing.Rejected =>
+      Some(LogEntry(request + ": rejected", Logging.ErrorLevel))
+    case resp =>
+      Some(LogEntry(request.uri + ": " + resp.getClass, Logging.DebugLevel))
   }
 }
 
