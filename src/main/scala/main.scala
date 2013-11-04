@@ -100,15 +100,18 @@ class Setup(
         s"Bound $result in ${System.currentTimeMillis - bind_start_time}ms")
       result match {
         case bound: akka.io.Tcp.Bound =>
-          zookeeper_registration = new ZooKeeperRegistration(
-            config.getString("server.path") + "/" +
-              config.getString("server.host") + ":" +
-              bound.localAddress.getPort,
-            config.getString("server.zookeeper"),
-            data = (if (config.hasPath("server.zookeeper-data"))
-                      config.getString("server.zookeeper-data")
-                    else "")
-          )
+          if (config.hasPath("server.path") &&
+                config.hasPath("server.zookeeper")) {
+            zookeeper_registration = new ZooKeeperRegistration(
+              config.getString("server.path") + "/" +
+                config.getString("server.host") + ":" +
+                bound.localAddress.getPort,
+              config.getString("server.zookeeper"),
+              data = (if (config.hasPath("server.zookeeper-data"))
+                        config.getString("server.zookeeper-data")
+                      else "")
+            )
+          }
         case wtf =>
           log.error(s"Bind failed: $wtf")
           system.shutdown()

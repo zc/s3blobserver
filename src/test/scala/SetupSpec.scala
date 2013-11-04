@@ -211,6 +211,73 @@ class SetupSpec extends
     }
   }
 
+  it should "work without ZooKeeper" in {
+    with_config("""
+        akka.loglevel = INFO
+        s3blobserver {
+          log4j = """"" + """"
+             log4j.rootLogger=INFO, TEST
+             log4j.appender.TEST=org.apache.log4j.FileAppender
+             log4j.appender.TEST.File=$tmpdir/log
+             log4j.appender.TEST.layout=org.apache.log4j.PatternLayout
+             log4j.appender.TEST.layout.ConversionPattern=%-5p %c %m%n
+             """"" + """"
+          cache {
+            same-file-system = true
+            directory = $cachedir
+            size = 100
+          }
+          s3 {
+            bucket = mybucket
+            prefix = test/
+          }
+          committed {
+            directory = $blobdir
+            age = 1s
+            poll-interval = 1s
+          }
+          server {
+            port = 0
+            host = localhost
+            path = /test
+            zookeeper = "zookeeper.example.com:2181"
+            zookeeper-data = somedata
+          }
+        }
+        """
+    ) {
+      (setup, base, tmpdir, blobdir, cachedir, s3) =>
+
+      assert(setup.cache.getClass eq classOf[S3BlobCache])
+
+      // verify that the logging config was updated:
+      val logging_s = new java.io.ByteArrayOutputStream()
+      new org.apache.log4j.config.PropertyPrinter(
+        new java.io.PrintWriter(logging_s))
+      val logging = new java.util.Properties()
+      logging.load(new java.io.ByteArrayInputStream(logging_s.toByteArray))
+      expectResult("INFO, TEST") {
+        logging.getProperty("log4j.rootLogger")
+      }
+
+      // Startup is logged
+      Testing.wait_until("expected log line") {
+        check_log(new File(tmpdir, "log"),
+                  "INFO  com.zope.s3blobserver.Setup Bound Bound.* in \\d+ms".r)
+      }
+
+      // Movers working:
+      util.stream_to_file(new ByteArrayInputStream("blob1".getBytes),
+                          new File(blobdir, "1.blob"))
+      val blobfile1 =
+        Testing.wait_until("1.blob moved") {
+          new File(cachedir, "1.blob").exists
+        }
+      Mockito.verify(s3).putObject(
+        "mybucket", "test/1.blob", new File(blobdir, "1.blob"))
+    }
+  }
+
   it should "handle separate file systems and aws creds" in {
     with_config("""
         akka.loglevel = ERROR
