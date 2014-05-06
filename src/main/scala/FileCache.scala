@@ -9,14 +9,14 @@ import scala.util.Success
 
 /**
  * Based on the SimpleLruCache from spray.cache
- *  
+ *
  * A thread-safe implementation of [[spray.caching.cache]].  The cache
  * has a defined maximum number of megabytes it can store. After the
  * maximum capacity is reached new entries cause old ones to be
  * evicted in a least-recently-used manner.
  *
  * Had to fork because the original, spray.caching.LruCache is final. :(
- * 
+ *
  * Also the semantics of ``cache(key) func`` are different.  This
  * implementation wraps the function in a future, so it runs in a
  * future. The original didn't.
@@ -71,9 +71,8 @@ class FileCache(val maxCapacity: Int)(implicit ec: ExecutionContext) {
   def bytes = store.weightedSize * 8192
 }
 
-class FileEvictionListener(
-  implicit ec: ExecutionContext
-) extends EvictionListener[Any, Future[File]] {
+class FileEvictionListener(implicit ec: ExecutionContext)
+  extends EvictionListener[Any, Future[File]] {
 
   override def onEviction(k: Any, v: Future[File]) : Unit = {
     v map { file => file.delete }
