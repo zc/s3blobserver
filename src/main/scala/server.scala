@@ -11,8 +11,10 @@ import spray.routing.RoutingSettings
 
 
 abstract class S3BlobServer(
-  val committed: File,  val cache: S3BlobCache, val s3: S3
-) extends spray.routing.HttpService {
+    val committed: File,
+    val cache: S3BlobCache,
+    val s3: S3)
+  extends spray.routing.HttpService {
 
   val route = {
     dynamic {
@@ -74,10 +76,12 @@ abstract class S3BlobServer(
 }
 
 class S3BlobServerActor(
-  committed: File, cache: S3BlobCache, s3: S3
-) extends
-    S3BlobServer(committed, cache, s3) with
-    akka.actor.Actor {
+    committed: File,
+    cache: S3BlobCache,
+    s3: S3)
+  extends S3BlobServer(committed, cache, s3)
+  with akka.actor.Actor {
+
   def actorRefFactory = context
   def receive = runRoute(route)
 }

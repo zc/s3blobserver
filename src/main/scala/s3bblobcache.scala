@@ -16,10 +16,10 @@ object S3BlobCache {
 }
 
 class S3BlobCache(
-  val directory: File, val cache: FileCache
-)(
-  implicit ec: ExecutionContext
-) {
+    val directory: File,
+    val cache: FileCache)(
+    implicit ec: ExecutionContext) {
+
   // A disk cache to which files can be moved.
   // IOW, source files must be on the same file system.
 
@@ -60,10 +60,10 @@ class S3BlobCache(
 }
 
 class CopyS3BlobCache(
-  directory: File, cache: FileCache
-)(
-  implicit ec: ExecutionContext
-) extends S3BlobCache(directory, cache) {
+    directory: File,
+    cache: FileCache)(
+    implicit ec: ExecutionContext)
+  extends S3BlobCache(directory, cache) {
 
   def this(directory: File, capacity_megabytes: Int)
           (implicit ec: ExecutionContext) =

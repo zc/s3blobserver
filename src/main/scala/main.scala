@@ -9,8 +9,8 @@ import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 import spray.can.Http
 
-object ProductionBindings extends
-    com.escalatesoft.subcut.inject.NewBindingModule(module => {})
+object ProductionBindings
+  extends com.escalatesoft.subcut.inject.NewBindingModule(module => {})
 
 object Main extends App {
   implicit val bindingModule = ProductionBindings
@@ -19,12 +19,10 @@ object Main extends App {
 }
 
 class Setup(
-  args: Array[String],
-  bind_timeout:Int = 9999
-)(
-  implicit val bindingModule: com.escalatesoft.subcut.inject.BindingModule
-) extends
-    com.escalatesoft.subcut.inject.Injectable {
+    args: Array[String],
+    bind_timeout:Int = 9999)(
+    implicit val bindingModule: com.escalatesoft.subcut.inject.BindingModule)
+  extends com.escalatesoft.subcut.inject.Injectable {
 
   val name = "s3blobserver"
 

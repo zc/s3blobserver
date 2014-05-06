@@ -71,7 +71,8 @@ class FileCache(val maxCapacity: Int)(implicit ec: ExecutionContext) {
   def bytes = store.weightedSize * 8192
 }
 
-class FileEvictionListener(implicit ec: ExecutionContext)
+class FileEvictionListener(
+    implicit ec: ExecutionContext)
   extends EvictionListener[Any, Future[File]] {
 
   override def onEviction(k: Any, v: Future[File]) : Unit = {

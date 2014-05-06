@@ -1,16 +1,16 @@
 /** Register a server with ZooKeeper
-  * 
+  *
   *  This registers a path as an ephemeral node.  If we get
   *  disconnected, the ZooKeeper client will try to reconnect.  If the
   *  session expires, we reconnect and re-register.
-  * 
+  *
   *  TODO: We have a problem here, which is that we don't know if the
   *  session has expired until we reconnect, but if we don't
   *  reconenct, we're unregistered and don't know it.  (We're in the
   *  same boat with other ZK apps :().  When we disconnect, we should
   *  set a timer and if the timer goes off without is reconnecting we
   *  should do something drastic, like restarting or asking for help.
-  * 
+  *
   */
 
 package com.zope.s3blobserver
@@ -30,15 +30,13 @@ class ZooKeeperFactory {
 }
 
 class ZooKeeperRegistration(
-  path: String,
-  connection_string: String = "127.0.0.1:2181",
-  session_timeout: Int = 4000,
-  data: String = "" 
-) (
-  implicit val system: akka.actor.ActorSystem,
-  implicit val bindingModule: com.escalatesoft.subcut.inject.BindingModule
-) extends
-    com.escalatesoft.subcut.inject.Injectable {
+    path: String,
+    connection_string: String = "127.0.0.1:2181",
+    session_timeout: Int = 4000,
+    data: String = "")(
+    implicit val system: akka.actor.ActorSystem,
+    implicit val bindingModule: com.escalatesoft.subcut.inject.BindingModule)
+  extends com.escalatesoft.subcut.inject.Injectable {
 
   val factory = injectOptional [ZooKeeperFactory] getOrElse {
     new ZooKeeperFactory }
